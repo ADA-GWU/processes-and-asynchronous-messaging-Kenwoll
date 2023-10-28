@@ -1,9 +1,16 @@
 [
     {
         "database": "async_db1",
-        "user": "dist_user1",
+        "user": "dist_user",
         "password": "dist_pass_123",
-        "host": "192.168.1.100",
-        "port": 6060
+        "host": "127.0.0.1",
+        "port": 6061
+    },
+    {
+        "database": "async_db2",
+        "user": "dist_user",
+        "password": "dist_pass_123",
+        "host": "127.0.0.1",
+        "port": 6062
     }
 ]
