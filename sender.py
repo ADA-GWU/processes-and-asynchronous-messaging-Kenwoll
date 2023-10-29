@@ -26,8 +26,6 @@ def connect_to_databases(configs):
             port=config["port"]
         )
 
-        connections.append(connection)
-    
     return connections
 
 def insert_message(connection, message):
@@ -39,36 +37,39 @@ def insert_message(connection, message):
     finally:
         cursor.close()
 
-# Read database configurations from the JSON file
-db_configs = read_db_config('db_config.json')
-
-# Connect to multiple databases
-connections = connect_to_databases(db_configs)
-
-def choose_thread_and_insert_message(threads, message):
-    chosen_thread = random.choice(threads)
-    chosen_connection = chosen_thread.connection
-    print(f"{chosen_thread.name} sends message")
-    insert_message(chosen_connection, message)
-
 class SenderThread(threading.Thread):
     def __init__(self, name, connection):
         threading.Thread.__init__(self)
         self.name = name
         self.connection = connection
 
-    def run(self):
-        while True:
-            user_input = input("Enter your message: ")
-            choose_thread_and_insert_message(sender_threads, user_input)
+# Read database configurations from the JSON file
+db_configs = read_db_config('db_config.json')
 
+# Connect to multiple databases
+connections = connect_to_databases(db_configs)
+
+# Connect to multiple databases
 sender_threads = []
 for i, connection in enumerate(connections):
     thread_name = f"Sender_{i+1}"
     sender_thread = SenderThread(thread_name, connection)
+    
     sender_threads.append(sender_thread)
     sender_thread.start()
 
-# Main thread waits for the sender threads to complete
 for thread in sender_threads:
     thread.join()
+
+while True:
+    message = input("Enter your message: ")
+    chosen_thread = random.choice(sender_threads)
+    insert_message(chosen_thread.connection, message)
+    print(f"{chosen_thread.name} finished query")
+    
+    flag = input("If you wanna continue press Enter else Exit: ")
+    if flag.lower() == "exit":
+        break
+
+for thread in sender_threads:
+    thread.connection.close()

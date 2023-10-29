@@ -12,5 +12,19 @@
         "password": "dist_pass_123",
         "host": "127.0.0.1",
         "port": 6062
+    },
+    {
+        "database": "hw1",
+        "user": "dist_user",
+        "password": "dist_pass_123",
+        "host": "34.75.144.18",
+        "port": 5432
+    },
+    {
+        "database": "hw1",
+        "user": "dist_user",
+        "password": "dist_pass_123",
+        "host": "34.76.123.81",
+        "port": 5432
     }
 ]
