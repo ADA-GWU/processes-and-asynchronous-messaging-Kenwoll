@@ -1,53 +1,6 @@
 import threading
 import time
-import json
-import psycopg2
-
-SELECT_QUERY = "SELECT SENDER_NAME, MESSAGE, SENT_TIME FROM ASYNC_MESSAGES WHERE RECEIVED_TIME " \
-                "IS NULL AND SENDER_NAME != %s FOR UPDATE SKIP LOCKED"
-
-UPDATE_QUERY = "UPDATE ASYNC_MESSAGES SET RECEIVED_TIME = timestamp 'epoch'" \
-                "+ %s * interval '1 second' WHERE SENDER_NAME = %s " \
-                "AND MESSAGE = %s AND SENT_TIME = %s"
-
-USER_NAME ="Murad"
-
-def read_db_config(filename):
-    """Function to read database configurations from a JSON file"""
-    with open(filename, 'r', encoding='utf-8') as file:
-        return json.load(file)
-
-def connect_to_databases(configs):
-    """Function to create connections to multiple databases"""
-    connections = []
-    for config in configs:
-        connection = psycopg2.connect(
-            database=config["database"],
-            user=config["user"],
-            password=config["password"],
-            host=config["host"],
-            port=config["port"]
-        )
-
-        connections.append(connection)
-
-    return connections
-
-def fetch_and_update_message(reader_name, connection):
-    """Function fetching an dupdating databse rows"""
-    cursor = connection.cursor()
-    try:
-        cursor.execute(SELECT_QUERY, (USER_NAME,))
-        row = cursor.fetchone()
-        if row:
-            sender_name, message_text, message_time = row
-            cursor.execute(UPDATE_QUERY, (time.time(), sender_name, message_text, message_time))
-            connection.commit()
-            return sender_name, message_text, message_time
-        else:
-            return None
-    finally:
-        cursor.close()
+from utilities.database_utils import *
 
 class ReaderThread(threading.Thread):
     """Threads for reading"""
@@ -58,8 +11,8 @@ class ReaderThread(threading.Thread):
 
     def run(self):
         while True:
-            time.sleep(1.5)
-            print(f'Thread {self.name} is idle for 5 seconds')
+            time.sleep(3)
+            print(f'Thread {self.name} is idle for 3 seconds')
             message = fetch_and_update_message(self.name, self.connection)
             if message:
                 sender_name, message_text, message_time = message
@@ -68,7 +21,7 @@ class ReaderThread(threading.Thread):
 
 
 # Read database configurations from the JSON file
-db_configs = read_db_config('db_config.json')
+db_configs = read_db_config('config/db_config.json')
 
 # Connect to multiple databases
 connections = connect_to_databases(db_configs)
