@@ -26,6 +26,8 @@ def connect_to_databases(configs):
             port=config["port"]
         )
 
+        connections.append(connection)
+
     return connections
 
 def insert_message(connection, message):
@@ -44,7 +46,7 @@ class SenderThread(threading.Thread):
         self.connection = connection
 
 # Read database configurations from the JSON file
-db_configs = read_db_config('db_config.json')
+db_configs = read_db_config('config/db_config.json')
 
 # Connect to multiple databases
 connections = connect_to_databases(db_configs)
