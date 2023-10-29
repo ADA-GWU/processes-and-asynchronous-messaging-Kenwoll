@@ -7,12 +7,11 @@ _MASTER_NAME = "Murad"
 _INSERT_QUERY = "INSERT INTO ASYNC_MESSAGES(SENDER_NAME, MESSAGE, SENT_TIME) " \
                 "VALUES(%s, %s,  to_timestamp(%s))"
 
-_SELECT_QUERY = "SELECT SENDER_NAME, MESSAGE, SENT_TIME FROM ASYNC_MESSAGES WHERE RECEIVED_TIME " \
+_SELECT_QUERY = "SELECT RECORD_ID, SENDER_NAME, MESSAGE, SENT_TIME FROM ASYNC_MESSAGES WHERE RECEIVED_TIME " \
                 "IS NULL AND SENDER_NAME != %s FOR UPDATE SKIP LOCKED"
 
 _UPDATE_QUERY = "UPDATE ASYNC_MESSAGES SET RECEIVED_TIME = timestamp 'epoch'" \
-                "+ %s * interval '1 second' WHERE SENDER_NAME = %s " \
-                "AND MESSAGE = %s AND SENT_TIME = %s"
+                "+ %s * interval '1 second' WHERE RECORD_ID = %s"
 
 def read_db_config(filename):
     """Function to read database configurations from a JSON file"""
@@ -51,8 +50,8 @@ def fetch_and_update_message(reader_name, connection):
         cursor.execute(_SELECT_QUERY, (_MASTER_NAME,))
         row = cursor.fetchone()
         if row:
-            sender_name, message_text, message_time = row
-            cursor.execute(_UPDATE_QUERY, (time.time(), sender_name, message_text, message_time))
+            record_id, sender_name, message_text, message_time = row
+            cursor.execute(_UPDATE_QUERY, (time.time(), record_id))
             connection.commit()
             return sender_name, message_text, message_time
         else:

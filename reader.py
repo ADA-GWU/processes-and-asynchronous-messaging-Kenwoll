@@ -16,7 +16,7 @@ class ReaderThread(threading.Thread):
             message = fetch_and_update_message(self.name, self.connection)
             if message:
                 sender_name, message_text, message_time = message
-                print(f"Sender {sender_name} sent {message_text} at time {message_time}.")
+                print(f"UPDATE: Sender {sender_name} sent {message_text} at time {message_time}.")
 
 
 
